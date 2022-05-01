@@ -58,9 +58,13 @@ client.on("messageCreate", async message => {
                         .setColor("#4cd377")
                         .setTitle(data.source.mountpoint)
                         .setURL(`${config.icecast_server}${data.source.mountpoint}`)
-                        .setDescription(data.source.title)
+                        .setDescription(data.source.title || "no description")
                         .addFields(
-                            {name: data.source.server_name, value: data.source.server_description, inline: false},
+                            {
+                                name: data.source.server_name || "name empty",
+                                value: data.source.server_description || "description empty",
+                                inline: false
+                            },
                             {
                                 name: `listeners: ${data.source.listeners}`,
                                 value: `peak: ${data.source.listener_peak}`,
@@ -72,7 +76,7 @@ client.on("messageCreate", async message => {
                         .setTitle("offline")
                         .setDescription("there are no streams currenly active.")
                         .addFields(
-                            {name: data.server_id, value: `location: ${data.location}\nadmin: ${data.admin}`, inline: true}
+                            {name: data.server_id || "server id empty", value: `location: ${data.location}\nadmin: ${data.admin}`, inline: true}
                         )
                 }
 
