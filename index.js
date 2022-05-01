@@ -1,8 +1,10 @@
-const { Client, Intents } = require("discord.js");
-const shlex = require("shlex");
-const config = require("./config.json");
+import {Client, Intents} from "discord.js";
+import shlex from "shlex";
+import fetch from "node-fetch";
 
-require("dotenv").config();
+import config from "./config.json" assert { type: "json" };
+
+import 'dotenv/config';
 
 if (!process.env.TOKEN) {
     console.error("error: TOKEN environment variable missing");
@@ -15,12 +17,19 @@ client.on("messageCreate", async message => {
     if (message.author.bot || !message.content.startsWith(config.prefix)) return;
     console.debug(`<${message.author.username}#${message.author.discriminator}/${message.author.id}> ${message.content}`);
     const args = shlex.split(message.content.substring(config.prefix.length));
-    console.debug(command);
+    console.debug(args);
 
     switch (args.shift()) {
         case "test":
             await message.channel.send("alive\n`args=" + JSON.stringify(args) + "`");
-            break
+            break;
+        case "status":
+            const msg = await message.channel.send("fetching status...");
+            const response = await fetch(config.icecast_server + "/status-json.xsl");
+            await msg.edit("parsing json...");
+            const data = (await response.json())["icestats"];
+            await msg.edit("```json\n" + JSON.stringify(data, null, 2) + "```");
+            break;
     }
 });
 

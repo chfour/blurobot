@@ -1,3 +1,4 @@
 {
-    "prefix": "%"
+    "prefix": "%",
+    "icecast_server": "http://blurrycast.servemp3.com:42069"
 }
