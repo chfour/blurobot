@@ -69,7 +69,8 @@ client.on("messageCreate", async message => {
         const errid = mkId();
         console.log(`errid: ${errid}`);
         console.error(e);
-        message.channel.send(`:warning: error! exception occured!\n\`errid=${errid} command="${command}" args=${JSON.stringify(args)}\`\n\`${e}\``);
+        message.channel.send(`:warning: error! exception occured!\n\`errid=${errid} command="${command}" args=${JSON.stringify(args)}\`\n\`${e}\``)
+            .catch(e => console.error("could not send error message:", e));
     }
 });
 
