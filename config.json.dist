@@ -1,0 +1,5 @@
+{
+    "prefix": "im:",
+    "tmpdir": "/tmp/",
+    "imagemagick_bin": "imagemagick"
+}

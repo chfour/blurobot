@@ -1,0 +1,17 @@
+{
+  "name": "blurobot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "chfour",
+  "license": "Unlicense",
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "shlex": "^2.1.0"
+  }
+}
