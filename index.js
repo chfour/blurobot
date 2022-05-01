@@ -41,26 +41,41 @@ client.on("messageCreate", async message => {
                 const response = await fetch(config.icecast_server + "/status-json.xsl");
                 await msg.edit(`\`${response.status} ${response.statusText}\` - parsing json...`);
                 const data = (await response.json())["icestats"];
+                await msg.edit(`\`${response.status} ${response.statusText}\` - json ok - building embed...`);
                 if (args.includes("--raw")) {
                     await msg.edit("```json\n" + JSON.stringify(data, null, 2) + "```");
                     break;
                 }
-                data.source.mountpoint = data.source.listenurl.slice(data.source.listenurl.lastIndexOf("/"))
+
                 const embed = new MessageEmbed()
-                    .setColor("#4cd377")
+                    .setColor("#515151")
                     .setAuthor({name: config.icecast_server})
-                    .setURL(`${config.icecast_server}${data.source.mountpoint}`)
-                    .setTitle(data.source.mountpoint)
-                    .setDescription(data.source.title)
-                    .addFields(
-                        {name: data.source.server_name, value: data.source.server_description, inline: false},
-                        {
-                            name: `listeners: ${data.source.listeners}`,
-                            value: `peak: ${data.source.listener_peak}`,
-                            inline: true
-                        }
-                    )
                     .setTimestamp();
+
+                if (data.source) {
+                    data.source.mountpoint = data.source.listenurl.slice(data.source.listenurl.lastIndexOf("/"))
+                    embed
+                        .setColor("#4cd377")
+                        .setTitle(data.source.mountpoint)
+                        .setURL(`${config.icecast_server}${data.source.mountpoint}`)
+                        .setDescription(data.source.title)
+                        .addFields(
+                            {name: data.source.server_name, value: data.source.server_description, inline: false},
+                            {
+                                name: `listeners: ${data.source.listeners}`,
+                                value: `peak: ${data.source.listener_peak}`,
+                                inline: true
+                            }
+                        );
+                } else {
+                    embed
+                        .setTitle("offline")
+                        .setDescription("there are no streams currenly active.")
+                        .addFields(
+                            {name: data.server_id, value: `location: ${data.location}\nadmin: ${data.admin}`, inline: true}
+                        )
+                }
+
                 await msg.edit("done!");
                 await msg.edit({embeds: [embed]});
                 break;
