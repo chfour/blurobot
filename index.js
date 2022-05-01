@@ -33,7 +33,9 @@ client.on("messageCreate", async message => {
                 await message.channel.send(
                     "**blurobot help**\n" +
                     "- `%help`: display this\n" +
-                    "- `%status [--raw]`: get blurryCast status (`--raw` sends raw json as received from the server)"
+                    "- `%status [--raw || --verbose || -v]`: get blurryCast status:\n" +
+                    "  * `--raw` sends raw json as received from the server) \n" +
+                    "  * `-v` || `--verbose` displays more info (ignored with `--raw`)"
                 );
                 break;
             case "status":
@@ -46,6 +48,8 @@ client.on("messageCreate", async message => {
                     await msg.edit("```json\n" + JSON.stringify(data, null, 2) + "```");
                     break;
                 }
+
+                const verbose = args.includes("-v") || args.includes("--verbose");
 
                 const embed = new MessageEmbed()
                     .setColor("#515151")
@@ -71,14 +75,20 @@ client.on("messageCreate", async message => {
                                 inline: true
                             }
                         );
+                    if (verbose) embed.addFields(
+                            {
+                                name: `${data.source.audio_channels}ch@${data.source["ice-samplerate"] / 1000}k / ${data.source.audio_bitrate/1000}k`,
+                                value: `${data.source.server_type} - ${data.source.subtype}`, inline: true
+                            }
+                        )
                 } else {
                     embed
                         .setTitle("offline")
                         .setDescription("there are no streams currenly active.")
-                        .addFields(
-                            {name: data.server_id || "server id empty", value: `location: ${data.location}\nadmin: ${data.admin}`, inline: true}
-                        )
                 }
+                if (verbose || !data.source) embed.addFields(
+                    {name: data.server_id || "server id empty", value: `location: ${data.location}\nadmin: ${data.admin}`, inline: true}
+                )
 
                 await msg.edit("done!");
                 await msg.edit({embeds: [embed]});
