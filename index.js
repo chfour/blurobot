@@ -2,6 +2,9 @@ import {Client, Intents, MessageEmbed} from "discord.js";
 import shlex from "shlex";
 import fetch from "node-fetch";
 
+import * as child from "child_process";
+import * as util from "util"
+
 import config from "./config.json" assert { type: "json" };
 
 import 'dotenv/config';
@@ -103,8 +106,12 @@ client.on("messageCreate", async message => {
     }
 });
 
+const commitId = (await util.promisify(child.exec)("git rev-parse --short HEAD")).stdout.trim();
+console.log(`running commit ${commitId}`);
+
 client.once("ready", () => {
-	console.log(`logged in as ${client.user.username}#${client.user.discriminator}`);
+    console.log(`logged in as ${client.user.username}#${client.user.discriminator}`);
+    client.user.setPresence({activities: [{name: `commit ${commitId}`}], status: "idle"});
 });
 
 client.login(process.env.TOKEN);
