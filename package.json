@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node .",
+    "daemon": "npm run stopd\necho \"starting at $(date -uIseconds)\" >> /tmp/blurobot.log\nnohup npm run start >> /tmp/blurobot.log 2>&1 &\necho $! > /tmp/blurobot.pid\necho \"bot running as pid $(cat /tmp/blurobot.pid), saving log to /tmp/blurobot.log\"",
+    "stopd": "echo \"stopping at $(date -uIseconds)\" >> /tmp/blurobot.log\nkill -INT `cat /tmp/blurobot.pid`",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "chfour",
