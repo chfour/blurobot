@@ -1,4 +1,5 @@
 {
     "prefix": "%",
+    "repo_link": "https://github.com/chfour/blurobot",
     "icecast_server": "http://blurrycast.servemp3.com:42069"
 }

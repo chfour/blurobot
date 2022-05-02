@@ -111,7 +111,7 @@ console.log(`running commit ${commitId}`);
 
 client.once("ready", () => {
     console.log(`logged in as ${client.user.username}#${client.user.discriminator}`);
-    client.user.setPresence({activities: [{name: `commit ${commitId}`}], status: "idle"});
+    client.user.setPresence({activities: [{name: `commit ${commitId} @ ${config.repo_link}`}], status: "idle"});
 });
 
 client.login(process.env.TOKEN);
