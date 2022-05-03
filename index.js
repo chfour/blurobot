@@ -1,6 +1,7 @@
 import {Client, Intents, MessageEmbed} from "discord.js";
 import shlex from "shlex";
 import fetch from "node-fetch";
+import {DateTime} from "luxon";
 
 import * as child from "child_process";
 import * as util from "util"
@@ -21,7 +22,11 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 client.on("messageCreate", async message => {
     if (message.author.bot || !message.content.startsWith(config.prefix)) return;
     console.debug(`<${message.author.username}#${message.author.discriminator}/${message.author.id}> ${message.content}`);
-    const args = shlex.split(message.content.substring(config.prefix.length));
+
+    let args;
+    try { args = shlex.split(message.content.substring(config.prefix.length)); }
+    catch (e) { console.error("formatting error: ", e); return; }
+
     console.debug(args);
     const command = args.shift();
     try {
@@ -60,7 +65,8 @@ client.on("messageCreate", async message => {
                     .setTimestamp();
 
                 if (data.source) {
-                    data.source.mountpoint = data.source.listenurl.slice(data.source.listenurl.lastIndexOf("/"))
+                    data.source.mountpoint = data.source.listenurl.slice(data.source.listenurl.lastIndexOf("/"));
+                    const streamDuration = DateTime.now().diff(DateTime.fromISO(data.source.stream_start_iso8601), ["seconds", "minutes", "hours", "days"]);
                     embed
                         .setColor("#4cd377")
                         .setTitle(data.source.mountpoint)
@@ -76,22 +82,38 @@ client.on("messageCreate", async message => {
                                 name: `listeners: ${data.source.listeners}`,
                                 value: `peak: ${data.source.listener_peak}`,
                                 inline: true
+                            },
+                            {
+                                name: `streaming for ${uptime.toHuman({maximumFractionDigits: 0, unitDisplay: "short"})}`,
+                                value: `started @ ${data.source.stream_start}`
                             }
                         );
                     if (verbose) embed.addFields(
-                            {
-                                name: `${data.source.audio_channels}ch@${data.source["ice-samplerate"] / 1000}k / ${data.source.audio_bitrate/1000}k`,
-                                value: `${data.source.server_type} - ${data.source.subtype}`, inline: true
-                            }
+                        {
+                            name: `${data.source.audio_channels}ch@${data.source["ice-samplerate"] / 1000}k / ${data.source.audio_bitrate/1000}k`,
+                            value: `${data.source.server_type} - ${data.source.subtype}`, inline: true
+                        }
                         )
                 } else {
                     embed
                         .setTitle("offline")
-                        .setDescription("there are no streams currenly active.")
+                        .setDescription("there are no streams currenly active.");
                 }
-                if (verbose || !data.source) embed.addFields(
-                    {name: data.server_id || "server id empty", value: `location: ${data.location}\nadmin: ${data.admin}`, inline: true}
-                )
+                if (verbose || !data.source){
+                    const uptime = DateTime.now().diff(DateTime.fromISO(data.server_start_iso8601), ["seconds", "minutes", "hours", "days"]);
+                    embed.addFields(
+                        {
+                            name: data.server_id || "server id empty",
+                            value: `location: ${data.location}\nadmin: ${data.admin}`,
+                            inline: true
+                        },
+                        {
+                            name: `uptime: ${uptime.toHuman({maximumFractionDigits: 0, unitDisplay: "short"})}`,
+                            value: `started @ ${data.server_start}`,
+                            inline: true
+                        }
+                    );
+                }
 
                 await msg.edit("done!");
                 await msg.edit({embeds: [embed]});
@@ -101,7 +123,7 @@ client.on("messageCreate", async message => {
         const errid = mkId();
         console.log(`errid: ${errid}`);
         console.error(e);
-        message.channel.send(`:warning: error! exception occured!\n\`errid=${errid} command="${command}" args=${JSON.stringify(args)}\`\n\`${e}\``)
+        message.channel.send(`:warning: error!\n\`errid=${errid} command="${command}" args=${JSON.stringify(args)}\`\n\`${e}\``)
             .catch(e => console.error("could not send error message:", e));
     }
 });
