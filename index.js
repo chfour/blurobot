@@ -69,7 +69,7 @@ client.on("messageCreate", async message => {
                     const streamDuration = DateTime.now().diff(DateTime.fromISO(data.source.stream_start_iso8601), ["seconds", "minutes", "hours", "days"]);
                     embed
                         .setColor("#4cd377")
-                        .setTitle(data.source.mountpoint)
+                        .setTitle(`${data.source.mountpoint}\ngenre: ${data.source.genre}`)
                         .setURL(`${config.icecast_server}${data.source.mountpoint}`)
                         .setDescription(data.source.title || "no description")
                         .addFields(
@@ -89,11 +89,11 @@ client.on("messageCreate", async message => {
                             }
                         );
                     if (verbose) embed.addFields(
-                        {
-                            name: `${data.source.audio_channels}ch@${data.source["ice-samplerate"] / 1000}k / ${data.source.audio_bitrate/1000}k`,
-                            value: `${data.source.server_type} - ${data.source.subtype}`, inline: true
-                        }
-                        )
+                            {
+                                name: `${data.source.audio_channels}ch@${data.source["ice-samplerate"] / 1000}k / ${data.source.audio_bitrate/1000}k`,
+                                value: `${data.source.server_type} - ${data.source.subtype}`, inline: true
+                            }
+                        );
                 } else {
                     embed
                         .setTitle("offline")
