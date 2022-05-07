@@ -12,6 +12,22 @@ import 'dotenv/config';
 
 const mkId = () => Array(8).fill(null).map(_=>Math.floor(Math.random()*255).toString(16)).join("");
 
+const ping = async (host) => {
+    let pingResult;
+    try {
+        pingResult = await util.promisify(child.execFile)("ping", ["-c", "1", "-w", "2", host]);
+    } catch (e) {
+        return {host: host, online: false, rttAvg: Infinity, stdout: e.stdout.trim(), code: e.code};
+    }
+    return {
+        host: host,
+        online: true,
+        rttAvg: parseFloat(pingResult.stdout.trim().split("\n").at(-1).match(/[0-9\.]+\//g)[1].slice(0, -1)),
+        stdout: pingResult.stdout,
+        code: 0
+    };
+}
+
 if (!process.env.TOKEN) {
     console.error("error: TOKEN environment variable missing");
     process.exit(1);
@@ -43,8 +59,34 @@ client.on("messageCreate", async message => {
                     "- `%help`: display this\n" +
                     "- `%status [--raw || --verbose || -v]`: get blurryCast status:\n" +
                     "  * `--raw` sends raw json as received from the server) \n" +
-                    "  * `-v` || `--verbose` displays more info (ignored with `--raw`)"
+                    "  * `-v` || `--verbose` displays more info (ignored with `--raw`)\n" +
+                    "- `%ping` displays ping times to the icecast server and other services"
                 );
+                break;
+            case "ping":
+                const hosts = [
+                    config.icecast_server.replace(/^https{0,1}:\/\//, "").replace(/:{0,1}[0-9]*$/, "")
+                ].concat(config.ping_hosts);
+                const statsMsg = await message.channel.send("pinging hosts...");
+                const roundtrip = statsMsg.createdTimestamp - message.createdTimestamp;
+                const statuses = await Promise.all(hosts.map(async (host, i) => {
+                    await statsMsg.edit(`pinging hosts... [${i+1}/${hosts.length}]`);
+                    return await ping(host);
+                }));
+                await statsMsg.edit("building embed...");
+                //await statsMsg.edit(JSON.stringify(statuses, null, 2));
+                const statsEmbed = new MessageEmbed()
+                    .setTitle("ping times")
+                    .addField(`message roundtrip: ${roundtrip}ms`, `websocket heartbeat: ${client.ws.ping}ms`, false);
+
+                statuses.forEach(s => statsEmbed.addField(
+                    `\`${s.host}\`: ${s.online ? s.rttAvg.toString()+"ms" : "OFFLINE"}`,
+                    "```\n" + (s.online ? s.stdout.split("\n").slice(0, 2).join("\n") : s.stdout) + "\n```",
+                    false
+                ));
+
+                await statsMsg.edit("done!");
+                await statsMsg.edit({embeds: [statsEmbed]});
                 break;
             case "status":
                 const msg = await message.channel.send("fetching status...");

@@ -1,5 +1,6 @@
 {
     "prefix": "%",
     "repo_link": "https://github.com/chfour/blurobot",
-    "icecast_server": "http://blurrycast.servemp3.com:42069"
+    "icecast_server": "http://blurrycast.servemp3.com:42069",
+    "ping_hosts": ["1.1.1.1"]
 }
