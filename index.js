@@ -84,7 +84,7 @@ client.on("messageCreate", async message => {
                                 inline: true
                             },
                             {
-                                name: `streaming for ${uptime.toHuman({maximumFractionDigits: 0, unitDisplay: "short"})}`,
+                                name: `streaming for ${streamDuration.toHuman({maximumFractionDigits: 0, unitDisplay: "short"})}`,
                                 value: `started @ ${data.source.stream_start}`
                             }
                         );
