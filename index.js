@@ -69,9 +69,9 @@ client.on("messageCreate", async message => {
                     const streamDuration = DateTime.now().diff(DateTime.fromISO(data.source.stream_start_iso8601), ["seconds", "minutes", "hours", "days"]);
                     embed
                         .setColor("#4cd377")
-                        .setTitle(`${data.source.mountpoint}\ngenre: ${data.source.genre}`)
+                        .setTitle(data.source.mountpoint)
                         .setURL(`${config.icecast_server}${data.source.mountpoint}`)
-                        .setDescription(data.source.title || "no description")
+                        .setDescription(`${data.source.title || "no description"}\ngenre: ${data.source.genre}`)
                         .addFields(
                             {
                                 name: data.source.server_name || "name empty",
