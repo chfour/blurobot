@@ -4,6 +4,8 @@ this is a discord bot dedicated to showing the status of @theblurry99's blurryCa
 
 this bot does not use slash commands because I think they're dumb and they take a lot of time to update and they work in a weird way.
 
+also note: this will not work on windows
+
 ## setup
 
 1. `git switch release`
